@@ -1,0 +1,17 @@
+condition: tally = tallying, ttb = take-the-best
+sub = subject number
+phase/block: 1 = practice, 2 = no time pressure, 3 = with time pressure
+stimuli_number for comparing between blocks
+trial_ordering is trial number within a block (i.e. when that stimuli was presented for that block)
+trial_difficulty: 1 = easy, 2 = medium, 3 = hard
+correct_response: 1 = left (country A), 2 = right (country B)
+sub_response: 1 = left (country A), 2 = right (country B)
+reaction_time is in milliseconds
+
+cue_value_rank: -1 = red cross on left (country A) & green checkmark on right (country B)
+		1 = green checkmark on left (country A) & red cross on right (country B)
+		0 = black equals sign (countries are tied on cue value)	
+		cue_value_rank1 = best cue ----> cue_value_rank7 = worst cue
+
+position: position1 = first cue shown (top to bottom) --> position7 = last cue shown (top to bottom)
+		1 = best cue ---> 7 = worst cue  shown for that screen position
