@@ -1,0 +1,33 @@
+sub = subject number
+condition: tally = tallying, TTB = take-the-best
+rank = randomized ranking of statistics
+rank_text = statistics in descending rank order
+sex: 0 = female, 1 = male
+block_order: 1 = no time pressure before time pressure block, 2 = time pressure before no time pressure block
+missed_responses: number of missed responses on time pressure block
+practice_accuracy = proportion of compliance with heuristic during practice
+practice_accuracy_easy = proportion of compliance with heuristic during practice (easy trials)
+practice_accuracy_medium = proportion of compliance with heuristic during practice (medium trials)
+practice_accuracy_hard = proportion of compliance with heuristic during practice (hard trials)
+test1_accuracy = proportion of compliance with heuristic during no time pressure block
+test1_accuracy_easy = proportion of compliance with heuristic during no time pressure block (easy trials)
+test1_accuracy_medium = proportion of compliance with heuristic during no time pressure block (medium trials)
+test1_accuracy_hard = proportion of compliance with heuristic during no time pressure block (hard trials)
+test2_accuracy = proportion of compliance with heuristic during time pressure block
+test2_accuracy_easy = proportion of compliance with heuristic during time pressure block (easy trials)
+test2_accuracy_medium = proportion of compliance with heuristic during time pressure block (medium trials)
+test2_accuracy_hard = proportion of compliance with heuristic during time pressure block (hard trials)
+practice_rt = median reaction times during practice
+practice_rt_easy = median reaction times during practice (easy trials)
+practice_rt_medium = median reaction times during practice (medium trials)
+practice_rt_hard = median reaction times during practice (hard trials)
+test1_rt = median reaction times during no time pressure block
+test1_rt_easy = median reaction times during no time pressure block (easy trials)
+test1_rt_medium = median reaction times during no time pressure block (medium trials)
+test1_rt_hard = median reaction times during no time pressure block (hard trials)
+test2_rt = median reaction times during time pressure block
+test2_rt_easy = median reaction times during time pressure block (easy trials)
+test2_rt_medium = median reaction times during time pressure block (medium trials)
+test2_rt_hard = median reaction times during time pressure block (hard trials)
+excluded_subjects: true = subject was excluded, false otherwise
+
