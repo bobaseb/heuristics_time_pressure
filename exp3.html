@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<!--[if lt IE 9]>         <html class="lt-ie9"> <![endif]-->
+<!--
+Some legalese:
+    MTurk experiment code
+    Copyright (C) 2014 Sebastian Bobadilla / Lukasz Kopec / TimTurkTools by Tim Brady
+    / Fullscreen plugin by kayahr
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Did you really get all the way here? Well done for being technically-minded,
+but we would appreciate if you didn't try to cheat by exploiting this experiment.
+
+I'm sure it's not 100% secured against any attempts to tamper with it,
+after all we are just simple researchers and we rely on you helping us out
+with our data collection.
+
+If you have any questions about this experiment, please do not hesitate
+to contact us.
+
+If you're here to re-use some code for your own Mechanical Turk experiments,
+please feel free to re-use it, modify it, but *DO OBSERVE THE GPL v3 ABOVE*
+and attribute it to the original author/s
+With any questions regarding this experiment or its code, contact Sebastian:
+sebastian dot suarez dot 12 #the at-character# ucl dot ac dot uk
+-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="https://www.ucl.ac.uk/lovelab/cacahuates/TimTurkTools.js"></script>
+<script src="https://www.ucl.ac.uk/lovelab/cacahuates/allStim.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://www.ucl.ac.uk/lovelab/cacahuates/allCues.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://www.ucl.ac.uk/lovelab/cacahuates/allY.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://www.ucl.ac.uk/lovelab/cacahuates/jquery.fullscreen.js" type="text/javascript" charset="utf-8"></script> 
+<!--https://github.com/kayahr/jquery-fullscreen-plugin/ -->
+
+<script>
+var clickedSent; var pwVal = []; var pwInput = ""; var pwScreen = "";
+var responsePract=[]; var responseTrain=[]; var responseTest=[]; response = "";
+var allRT=""; var allQs=""; var allLabels=""; var allCues =""; var allStim ="";
+var startExp = new Date(); var endExp;
+var age; var sex;
+var pw=[];
+var sign; //this is for showing the "+" and "-" for each trial
+var startTrialTime = 0;
+var testing1 = false; //turns to false later to transition to testing
+var practice = true;
+
+var no_resizes = 0; /* Number of times that the window was resized. */
+var no_resizes_limit = 1;
+var noFS=false;
+var toggleFS = false;
+
+var pword = 0;
+var counter = 0;
+var ans; var label;
+var feedback;
+var n_key = 78;
+
+var currentTrial = -1; 
+var sub; var load=false; 
+var textarray; var textarray_orig;
+
+
+var lowEnd1 = 0;
+var lowEnd2 = 0;
+var lowEnd3 = 0;
+var highEnd = allStimSub1.length - 1;  //*****change this for debugging
+var orderPrac = [];
+var orderTest1 = [];
+var orderTest2 = [];
+while(lowEnd1 <= highEnd){
+   orderPrac.push(lowEnd1++);
+   orderTest1.push(lowEnd2++);
+   orderTest2.push(lowEnd3++);
+}
+orderPrac = Shuffle(orderPrac);
+orderTest1 = Shuffle(orderTest1);
+orderTest2 = Shuffle(orderTest2);
+
+rank = Shuffle([0,1,2,3,4,5,6]);
+
+function isEven(n) 
+{
+   return isNumber(n) && (n % 2 === 0);
+}
+
+function isNumber(n)
+{
+   return n === parseFloat(n);
+}
+
+function getSub(){
+    $.ajax({
+	type: "POST",
+	url: "https://www.ucl.ac.uk/lovelab/cacahuates/getdata.php",
+	success: function(resp) {
+         sub = resp;
+	    console.log(resp);
+           sub = parseInt(sub);
+
+if (sub>300){   $('#consent_form').hide();
+	    	$('#busy').show(); }
+
+//condition  //tally or TTB
+if (isEven(sub)){condition = "TTB";} else { 
+    condition = "TTB";} //change one of these to tally later
+    
+textarray_orig = [
+ "Competitiveness in small to medium enterprises",
+ "Price stability in basic goods",
+ "Increased employment opportunities",
+ "Public investment in infrastructure", 
+ "Decreasing rates of infectious diseases",
+ "Increased life expectancy",
+ "Development of civic participation"
+];
+
+textarray = [textarray_orig[rank[0]], textarray_orig[rank[1]], textarray_orig[rank[2]], textarray_orig[rank[3]],
+            textarray_orig[rank[4]], textarray_orig[rank[5]], textarray_orig[rank[6]]
+    ];
+    
+X7 = textarray[0]; X6 = textarray[1]; X5 = textarray[2]; X4 = textarray[3]; 
+X3 = textarray[4]; X2 = textarray[5]; X1 = textarray[6]; 
+	}
+});
+}
+
+$(document).ready(function(){
+        $("body").show();
+        hideAll();
+        setTimeout(timeLimit,5400000); //experiment expires after a one hour and a half
+});
+
+function hideAll(){
+    	$('#submitButton').hide();
+        $('#password').hide();
+        $('#wrong_password').hide();
+        $('#input_password').hide();
+        $('#thanks').hide();
+        $('#thankYou').hide();
+        $('#noconsent').hide();
+        $('#test_instructions1').hide();
+        $('#test_instructions2').hide();
+        $('#practice_instructions').hide();
+        $('#experiment').hide();
+        $('#predictor_explanation1').hide();
+        $('#questions').hide();
+        $('#sorry').hide();
+        $('#underAge').hide();
+        $('#noFS').hide();
+        $('#enter').hide();
+        $('#fullScreen').hide();
+        $('#sorry2').hide();
+        $('#sorry3').hide();
+        $('#busy').hide();
+        $('#practice1').hide();
+        $('#example').hide();
+        $('#example2').hide();
+        $('#agree3').hide();
+        $('#agree2').hide();
+        $('#oppositeFirst').hide();
+        $('#enter_practice').hide();
+        $('#Rule101').hide();$('#Rule102').hide();$('#Rule103').hide();$('#Rule104').hide();$('#Rule105').hide();$('#Rule106').hide();
+        $('#Rule107').hide();$('#Rule108').hide();$('#Rule109').hide();$('#Rule110').hide();$('#Rule111').hide();
+        $('#continue').hide();
+        $('#feedback').hide();
+        }
+
+function timeLimit(){
+hideAll();       
+        $('#sorry3').show();
+}
+
+    /* From http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter */
+function getQueryParams(qs) {
+    qs = qs.split("+").join(" ");
+
+    var params = {}, tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])]
+            = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+
+var query = getQueryParams(document.location.search);
+//ps_id = query.ps_id;
+var mturk_id = query.mturk_id;
+var assignmentId = query.assignmentId;
+var hitId = query.hitId;
+//if (mturk_id==="" || mturk_id==="undefined"){mturk_id = query.workerId;}
+/* Now if you open url baseballStudy.html?ps_id=123&mturk_id=AAABBB, ps_id would be 123 abd mturk_id AAABBB */
+
+/* Change the location of php accordingly */
+$.ajax({
+	type: "POST",
+	url: "https://www.ucl.ac.uk/lovelab/cacahuates/check_id.php",
+	data: {
+	    'mturkid': mturk_id
+	},
+	success: function(resp2) {
+	    /* Do something with the response */
+	    if (resp2 === 'true') {
+                $('#consent_form').hide();
+                $('#busy').hide();
+	    	$('#sorry2').show(); //change to sorry2 for kicking out previous turkers
+	    }
+            else{
+               getSub(); 
+            }
+	    console.log(resp2);
+            
+	}
+});
+
+function intro(){
+    clickedSent = 1;
+}
+
+checkDimensions = function() {
+if (toggleFS){toggleFS = false; return;}
+else{
+     if (no_resizes < no_resizes_limit) {
+        alert("This experiment must be done in fullscreen. If you are not in fullscreen the experiment will stop.\n\
+        \n Please click on the blue hyperlink at the top to return to fullscreen.");
+        //$(document).fullScreen(true);
+        $('#fullScreen').show();
+        no_resizes++;
+        console.log("Window resized!");
+        return;
+    } 
+    else {
+hideAll();
+        $('#noFS').show();
+        noFS=true;
+        
+        alert("Sorry, you are not using Full Screen mode!");
+        console.log("Window resized too many times.");
+        return false;
+    }}
+};
+
+function makeFS() {
+    $(document).fullScreen(true);
+    $('#fullScreen').hide();
+}
+
+$(document).bind('fullscreenchange', function() {
+    // if we currently in fullscreen mode
+        if ($(document).fullScreen()) {
+        noFS = false;}
+    else{
+    if (expRunning){
+        toggleFS=true;
+    if (no_resizes < no_resizes_limit) {
+        alert("This experiment must be done in fullscreen. After a certain number of exits or if you are not in fullscreen the experiment will stop.\n\
+        \n Please click on the blue hyperlink at the top to return to fullscreen.");
+        //$(document).fullScreen(true);
+        $('#fullScreen').show();
+        no_resizes=no_resizes+0.5;
+        console.log("Window resized!");
+        return;
+    } 
+     else {
+hideAll();
+        $('#noFS').show();
+
+        noFS=true;
+        
+        alert("Sorry, you are not using Full Screen mode!");
+        console.log("Window resized too many times.");
+        return false;
+    }
+    }
+}
+});
+
+  function isInteger(x) {
+        return (typeof x === 'number') && (x % 1 === 0);
+    }
+    
+function questions() {
+    if(noFS){return;};
+
+        if($("#consent2").is(':checked') && clickedSent){          
+            
+             expRunning = true;
+             $(document).fullScreen(true);
+            $('#consent_form').hide();
+                $('#questions').show();
+    
+    $('.noEnterSubmit').keypress(function(e){
+    if ( e.which === 13 ) return false;
+});
+
+    } else if (clickedSent){
+        intro();
+    } else {
+        $('#noconsent').show();
+        $('#consent_form').hide();
+    }
+}
+
+function chk_questions(){
+    if(noFS){return;};
+    if(!$('input[name=sex]:checked', '#questions').is(':checked')
+            || !$('#age').val()) {console.log(1); questions(); alert("Please answer the whole form.");return;}
+    
+    age = $("input#age").val(); age = parseInt(age);
+    
+        if( age>100 || !isInteger(age) ) {console.log(2); questions();
+            $('#age').val('');
+            alert("Please enter a valid age.");return;}
+    
+    sex = $('#questions').find('input[name="sex"]').val();
+    
+ 
+    if (age<18) {underAge();}
+    else{
+            $('#questions').hide();
+            $('#practice_instructions').show();
+            if (load===true){
+        $('#noload_instr').hide();//important!!!!
+    } else{
+        $('#load_instr').hide();
+    }
+            
+            $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === 13){
+                advisor();}
+                else{
+                   chk_questions(); 
+                }
+          });
+    }
+}
+
+function sorry(){
+    hideAll();  
+    $('#questions').hide();
+    $('#sorry').show();
+}
+
+function underAge(){
+    hideAll();  
+    $('#questions').hide();
+    $('#underAge').show();    
+}
+
+function advisor(){
+    if(noFS){return;};
+
+    ruleTrack++;
+     $('#practice_instructions').hide();
+    $('#Rule' + (ruleTrack-1)).hide();
+    $('#Rule' + ruleTrack).show();
+    $('#continue').show();
+    
+  if(ruleTrack===111){predictors();}
+}
+
+var ruleTrack = 100; //advisor walkthrough goes from Rule101.png to Rule110.png
+
+function predictors(){
+    if(noFS){return;};
+    window.scrollTo(0,0);
+    
+    document.getElementById('predRank').innerHTML= '1. ' + X7 + '<br>' + '2. ' + X6 + '<br>' + '3. ' + X5 + '<br>' +
+            '4. ' + X4 + '<br>' + '5. ' + X3 + '<br>' + '6. ' + X2 + '<br>' + '7. ' + X1 + '<br>';
+    
+    document.getElementById('X7').innerHTML= '1. ' + X7;    document.getElementById('X6').innerHTML= '2. ' + X6;
+    document.getElementById('X5').innerHTML= '3. ' + X5;    document.getElementById('X4').innerHTML= '4. ' + X4; 
+    document.getElementById('X3').innerHTML= '5. ' + X3;    document.getElementById('X2').innerHTML= '6. ' + X2;
+    document.getElementById('X1').innerHTML= '7. ' + X1;
+
+    $('#predictor_explanation1').show();
+   $('#Rule' + ruleTrack).hide();
+    $('#continue').hide();
+    
+     $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === 13){
+                START();}
+                else{
+                   predictors(); 
+                }
+          });
+}             
+
+function START() {
+    if(noFS){return;};
+    
+    currentTrial = -1;
+    hideAll();
+        $('#enter').show();
+       
+         $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === 13 && !noFS){
+                hideAll(); 
+                allRT = allRT.concat("||---practiceAllRT:");
+                allLabels = allLabels.concat("||---pracLabels:");    
+                NextTrial();
+            }
+        else if (noFS){
+            return;
+        }
+                else{
+                   START(); 
+                }
+          });
+}
+
+var expRunning;
+
+function NextTrial() {        
+        if(noFS){return;};
+        RndText();
+        hideAll();
+            
+            window.setTimeout(StartTrial,500);
+        
+        }
+        
+function StartTrial() {
+    if(noFS){return;};
+    
+        startTrialTime = new Date().getTime();
+        
+         $(document).one('keydown',function (e){
+            key  = e.keyCode;
+            if(key === 66){
+               
+                var currentTime = new Date().getTime();
+                var RT = currentTime - startTrialTime;
+                allRT = allRT.concat(RT + ",");
+
+                 PressedNo();
+            }else if(key === 65){
+                
+                var currentTime = new Date().getTime();
+                var RT = currentTime - startTrialTime;
+                allRT = allRT.concat(RT + ",");
+
+                PressedYes();
+            }
+                else{
+                    StartTrial();
+                }
+            });
+
+        $('#headerInstr').show(); 
+        $('#yesno').show();
+        
+        $('#experiment').show();
+                
+        if(practice && !testing1){
+        $('#rule').show();}
+    else{
+        $('#rule').hide();}
+                
+        if(!$(document).fullScreen()){checkDimensions();}
+        if(noFS){return;};
+}
+
+
+function PressedYes() {
+         if(noFS){return;};
+         $(document).unbind('keyup', 'a', PressedYes); //yes "y" changed to "a" above
+         ans = 1;
+
+        if (practice && !testing1){
+             responsePract = responsePract.concat(ans);        
+            RuleFeedback();
+     }
+     else if(!practice && testing1){
+            responseTrain = responseTrain.concat(ans);
+            thanks();
+     }
+        else{            
+            responseTest = responseTest.concat(ans);
+            rememberLoad();}
+}
+
+function PressedNo() {
+         if(noFS){return;};
+        $(document).unbind('keyup', 'b', PressedNo); //no "n" changed to "b" below
+        ans = -1;
+        
+        if (practice && !testing1){
+             responsePract = responsePract.concat(ans);        
+            RuleFeedback();
+     }
+     else if(!practice && testing1){
+            responseTrain = responseTrain.concat(ans);
+            thanks();
+     }
+        else{            
+            responseTest = responseTest.concat(ans);
+            rememberLoad();}               
+}
+
+function RuleFeedback(){
+if(noFS){return;};
+
+    label = window['allYSub' + sub][orderPrac[currentTrial]];
+    
+    if(label===-1){direction = 'decrease'; color1 = 'red'; color2 = 'green';} 
+    else {direction = 'increase'; color1 = 'green'; color2 = 'red';}
+    
+if (condition==="tally"){
+    label=-label;
+    
+    tallyNo = 0;
+for (var i = 0; i < trialSigns.length; i++) {
+    tallyNo += trialSigns[i] << 0;
+}
+
+tallyExplanation = [
+    ['The rule predicts that the country would ' + direction + ' their GDP since there were '
+                + tallyNo + color1 + ' more stats than there were ' + color2 + '.']
+];
+}
+else{
+ttbExplanation = [
+    ['The rule predicts that the country would ' + direction + ' their GDP since ' + X7 + ' was ' + color1 + '.'],
+    ['The rule predicts that the country would ' + direction + ' their GDP since ' + X6 + ' was ' + color1 
+                + ' and ' + X7 + ' was neutral.'],
+    ['The rule predicts that the country would ' + direction + ' their GDP since ' + X5 + ' was ' + color1 + 
+        ' and both ' + X7 + ' and ' + X6  + ' were neutral.'],    
+    ['The rule predicts that the country would ' + direction + ' their GDP since ' + X4 + ' was ' + color1 + 
+        ' and ' + X7 + ', ' + X6 + ', and ' + X5  + ' were neutral.'],
+    ['The rule predicts that the country would ' + direction + ' their GDP since ' + X3 + ' was ' + color1 + 
+        ' and ' + X7 + ', ' + X6 + ', ' + X5 + ', and ' + X4  + ' were neutral.']             
+];}
+
+if(condition==="TTB"){
+    
+    if(trialSignsTemp[0]!==0){
+        explanation = ttbExplanation[0];
+    }
+    else if(trialSignsTemp[0]===0 && trialSignsTemp[1]!==0){
+        explanation = ttbExplanation[1];
+    }
+    else if(trialSignsTemp[0]===0 && trialSignsTemp[1]===0 && trialSignsTemp[2]!==0){
+        explanation = ttbExplanation[2];
+    }
+    
+}
+else {
+    explanation = tallyExplanation;
+}
+
+    $('#headerInstr').hide(); $('#txtInstrTop').hide(); $('#yesno').hide();
+    $('#feedback').show();
+    $('#rule').hide();
+
+    if (ans===label){
+        feedback = ' <strong>Good! You understood the rule!</strong><br><br> ' 
+                + explanation + ' <br><br>Press "N" to go to the next trial.';
+    }
+    else if (ans!==label) {
+        feedback = '<br><br> <strong>Bad. You did not understand the rule.</strong><br><br> '  
+                + explanation + ' <br><br>Press "N" to go to the next trial.';
+    }
+    
+    document.getElementById('feedback').innerHTML=feedback;
+
+    if(currentTrial<orderPrac.length-1){
+                   $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === n_key){
+                allLabels = allLabels.concat(label + ',');
+                NextTrial();}
+                else{
+                   RuleFeedback(); 
+                }
+          });}
+    else {   $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === n_key){
+                test1Intro();}
+                else{
+                   RuleFeedback(); 
+                }
+          });; 
+      }
+};
+
+function test1Intro(){
+ if(noFS){return;};
+    currentTrial = -1;
+    hideAll();
+          testing1 = true;
+          practice = false;
+          
+    $('#test_instructions1').show();
+    $('#experiment').hide();
+    $('#feedback').hide();
+        
+        $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === 13){
+                allRT = allRT.concat("||---testing1AllRT:");
+                allLabels = allLabels.concat("||---testing1Labels:");
+                NextTrial();}
+                else{
+                   test1Intro(); 
+                }
+          });
+}
+
+function thanks(){
+    if(noFS){return;};
+    $('#experiment').hide();
+    $('#feedback').hide();
+    $('#thankYou').show();
+    
+    label = window['allYSub' + sub][orderTest1[currentTrial]];
+    
+    if(condition==="tally"){
+        label = -label;
+    }
+    
+    allLabels = allLabels.concat(label + ',');
+    
+    if (currentTrial < orderTest1.length-1) {
+         setTimeout(NextTrial,1000);
+    } else {
+        currentTrial = -1;
+        practice = true; //signals both practice and testing1 are done, giving way to testing
+        testing1 = true;
+        window.setTimeout(test2Intro,2000);
+	$('#thankYou').hide();	
+	$('#experiment').hide();
+	}
+};
+
+function test2Intro(){
+ if(noFS){return;};
+    currentTrial = -1;
+    hideAll();
+    
+    $('#test_instructions2').show();
+    $('#experiment').hide();
+    $('#feedback').hide();
+        
+        $(document).one('keydown',function(e){
+            key  = e.keyCode;
+            if(key === 13){
+                allRT = allRT.concat("||---testing2AllRT:");
+                allLabels = allLabels.concat("||---testing2Labels:");
+                CognitiveLoad();}
+                else{
+                   test2Intro(); 
+                }
+          });
+}
+
+function CognitiveLoad() {   
+    if(noFS){return;};
+    hideAll();
+         $(document).unbind('keyup', 'space', CognitiveLoad);
+         $('#input_password').hide();
+         $('#feedback').hide();
+         $('#experiment').hide();
+         $('#thankYou').hide();
+         $('#test_instructions1').hide();
+         $('#wrong_password').hide();
+         $('#password').show();
+       
+         //5 digit hex: min=65536, max=1048575
+         //6 digit hex: min=1048576, max=16777215
+         //7 digit hex: min=16777216, max=268435455
+        pwordDec = Math.floor(Math.random() * (16777215 - 1048576 +1)) + 1048576; 
+         
+        pword = pwordDec.toString(16);
+         
+         document.getElementById('password').innerHTML=pword;
+         window.setTimeout(NextTrial,4000);
+}
+
+function rememberLoad() {
+    if(noFS){return;};
+         $('#experiment').hide();
+         $('#feedback').hide();
+         $('#experiment').hide();
+         $('#thankYou').hide();
+         $('#wrong_password').hide();
+         $('#password').hide();
+         $('#input_password').show();
+       
+    label = window['allYSub' + sub][orderTest1[currentTrial]];
+    
+    if(condition==="tally"){
+        label = -label;
+    }
+         
+$('#pwForm').one('keydown',function(e) {
+    if (e.keyCode === 13) {   //13 is enter
+        
+            pw = $("input#pwForm").val();
+            //pw = parseInt(pw);
+            this.value = "";
+            pwInput = pwInput.concat(pw + ",");
+            pwScreen = pwScreen.concat(pword + ",");
+          
+            allLabels = allLabels.concat(label + ',');
+            
+    if (currentTrial < orderTest2.length-1) {
+        
+         if(pw !== pword){
+         wrongPW();
+         pwVal = pwVal.concat(0);
+       
+  
+        }
+        else if (pw===pword) {
+           
+        CognitiveLoad();
+        pwVal = pwVal.concat(1);
+        
+       
+    }
+    
+    } else {
+        if(pw !== pword){pwVal = pwVal.concat(0);} 
+        else {pwVal = pwVal.concat(1);} 
+        
+        window.setTimeout(giveNum,2500);
+                $('#input_password').hide();
+		$('#experiment').hide();
+              
+	}
+        } else{rememberLoad();}
+});
+}
+
+function wrongPW(){
+    if(noFS){return;};
+    $('#input_password').hide();
+    $('#password').hide();
+    $('#wrong_password').show();
+    
+    window.setTimeout(CognitiveLoad,5000);
+};
+
+ var cue1; var cue2; var cue3; var cue4; var cue5; var cue6; var cue7; 
+
+function RndText() {
+    currentTrial++;
+    if(practice && !testing1){
+        trialSignsTemp = window['allStimSub' + sub][orderPrac[currentTrial]];
+        sub_order=window['allCuesSub' + sub][orderPrac[currentTrial]];           
+    }
+    else if (!practice && testing1){
+         trialSignsTemp = window['allStimSub' + sub][orderTest1[currentTrial]];
+         sub_order=window['allCuesSub' + sub][orderTest1[currentTrial]];         
+    }
+    else{
+        trialSignsTemp = window['allStimSub' + sub][orderTest2[currentTrial]];
+        sub_order=window['allCuesSub' + sub][orderTest2[currentTrial]];
+    }
+    
+    trialSignsTemp = [trialSignsTemp[6],trialSignsTemp[5],trialSignsTemp[4],trialSignsTemp[3],trialSignsTemp[2],trialSignsTemp[1],
+    trialSignsTemp[0]];
+    
+        trialSigns=[];
+        for (var j=0; j < sub_order.length; j++){
+        trialSigns = trialSigns.concat(trialSignsTemp[sub_order[j]]);
+            }
+            
+    allCues = allCues.concat(sub_order + ',');
+    allStim = allStim.concat(trialSigns + ',');
+    
+  document.getElementById('ShowText1').innerHTML=textarray[sub_order[0]];
+  document.getElementById('ShowText2').innerHTML=textarray[sub_order[1]];
+  document.getElementById('ShowText3').innerHTML=textarray[sub_order[2]];
+  document.getElementById('ShowText4').innerHTML=textarray[sub_order[3]];
+  document.getElementById('ShowText5').innerHTML=textarray[sub_order[4]];
+  document.getElementById('ShowText6').innerHTML=textarray[sub_order[5]];
+  document.getElementById('ShowText7').innerHTML=textarray[sub_order[6]];  
+  
+  if (trialSigns[0]===1){cue1 = "+";} else if (trialSigns[0]===-1) {cue1 = "-";}  else {cue1 = "0";}//check cue ordering with testCues, trainCues, etc...
+  if (trialSigns[1]===1){cue2 = "+";} else if (trialSigns[1]===-1) {cue2 = "-";}  else {cue2 = "0";}//check cue ordering with testCues, trainCues, etc...
+  if (trialSigns[2]===1){cue3 = "+";} else if (trialSigns[2]===-1) {cue3 = "-";}  else {cue3 = "0";}//check cue ordering with testCues, trainCues, etc...
+  if (trialSigns[3]===1){cue4 = "+";} else if (trialSigns[3]===-1) {cue4 = "-";}  else {cue4 = "0";}//check cue ordering with testCues, trainCues, etc...
+  if (trialSigns[4]===1){cue5 = "+";} else if (trialSigns[4]===-1) {cue5 = "-";}  else {cue5 = "0";}//check cue ordering with testCues, trainCues, etc...
+  if (trialSigns[5]===1){cue6 = "+";} else if (trialSigns[5]===-1) {cue6 = "-";}  else {cue6 = "0";}
+  if (trialSigns[6]===1){cue7 = "+";} else if (trialSigns[6]===-1) {cue7 = "-";}  else {cue7 = "0";}
+  
+  document.getElementById('ShowSign1').innerHTML= cue1;
+  document.getElementById('ShowSign2').innerHTML= cue2;
+  document.getElementById('ShowSign3').innerHTML= cue3;
+  document.getElementById('ShowSign4').innerHTML= cue4;
+  document.getElementById('ShowSign5').innerHTML= cue5;
+  document.getElementById('ShowSign6').innerHTML= cue6;
+  document.getElementById('ShowSign7').innerHTML= cue7;
+  
+  for (var i=0; i < sub_order.length; i++) { 
+  if(trialSigns[i] === 1){sign = "positive";} else if (trialSigns[i] === -1) {sign = "negative";}
+  else {sign = "neutral";}
+  
+  switch(i) {
+    case 0:
+        document.getElementById('ShowSign1').className = sign;
+        break;
+    case 1:
+        document.getElementById('ShowSign2').className = sign;
+        break;
+            case 2:
+        document.getElementById('ShowSign3').className = sign;
+        break;
+            case 3:
+        document.getElementById('ShowSign4').className = sign;
+        break;
+            case 4:
+        document.getElementById('ShowSign5').className = sign;
+        break;
+            case 5:
+        document.getElementById('ShowSign6').className = sign;
+        break;
+            case 6:
+        document.getElementById('ShowSign7').className = sign;
+        break;
+  }
+}
+}
+
+var data; var code; var completed=0;
+function giveNum(){
+    expRunning = false;
+$(document).fullScreen(false);
+completed = 1;
+getCode();
+setTimeout(update,3000);
+}
+
+function getCode()
+{
+    $.ajax({
+	type: "POST",
+	url: "https://www.ucl.ac.uk/lovelab/cacahuates/getCode.php",
+        data: {
+        'sub': sub
+	},
+        success: function(resp3) {
+        code = resp3;
+        code = parseFloat(resp3) * 10000;
+        code = Math.floor(code);
+        code = code.toString();
+        code = code + code;
+        }
+});
+}
+
+function update(){
+    endExp = new Date();
+    data = "||---sub:" + sub + "||---age:" + age
+    + "||---sex:" + sex + "||---rank:" + rank + "||---orderPrac:" + orderPrac
+    + "||---orderTesting1:" + orderTest1 + "||---orderTesting2:" + orderTest2 + allRT 
+    + "||---pwInput:" + pwInput + "||---pwScreen:" + pwScreen + "||---pwVal:" + pwVal + allLabels
+    + "||---practResponse:" + responsePract + "||---testing1Response:" + responseTrain + "||---testing2Response:" + responseTest
+    + "||---startExp:" + startExp + "||---endExp:" + endExp + "||---code:" + code
+    + "||---textArray:" + textarray + "||---allCues:" + allCues + "||---allStim:" + allStim;
+    
+        $.ajax({
+	type: "POST",
+	url: "https://www.ucl.ac.uk/lovelab/cacahuates/submitdata.php",
+	data: {
+	    'mturk_id': mturk_id,
+            'completed': completed,
+            'data': data,
+            'sub': sub
+	},
+        success: function(resp) {
+        document.getElementById('turkNum').innerHTML= "Thank you for taking part in this study, we are very grateful for your time."
+        + " <br><br> " +
+        "DEBRIEF: This study was not based on real economic statistics. This was only used as a cover story for researching how people\n\
+          use decision heuristics such as tallying and take-the-best (Gigerenzer & Todd, 1999)."
+        + " <br><br> " +
+        "Please copy this code to claim your compensation on MTurk: " + code + " <br><br> " +
+        "If you have any concerns, or open questions about this study, email the researcher:" + " <br><br> " +
+        "Sebastian Bobadilla Suarez" + " <br> " +
+        "sebastian.suarez.12@ucl.ac.uk";
+	$('#thanks').show();
+        $('#submitButton').show();
+	$('#turkNum').show();
+        }
+});
+}
+</script>
+
+<style>
+.nonselectable {
+  -webkit-user-select: none;
+  -khtml-user-drag: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+    
+#experiment {
+	font-family: Arial, Helvetica;
+        position: absolute;
+	width: 450px;
+        top: 100px;
+	left: 250px;
+        border: forestgreen;
+        border-width: thick;
+}
+
+.container {
+	position: relative;
+	background: white;
+        left: 0px;
+	width: 600px;
+	height: 200px;
+	margin: 30px;
+}
+
+.predictors {
+	position: relative;
+	background: white;
+        left: 0px;
+	width: 600px;
+	height: 240px;
+	margin: 30px;
+        font-weight: bold;
+	color: black;
+	font-size: 14pt;
+}
+
+.displays {
+	position: absolute;
+	display: none;
+	top: 0px;
+	left: 0px;
+}
+
+#password {
+	position: absolute;
+	top: 300px;
+	left: 600px;
+	font-weight: bold;
+	color: black;
+	font-size: 20pt;
+}
+
+.center {
+	position: absolute;
+	top: 300px;
+	left: 350px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+        width: 1000px;
+}
+
+#wrong_password {
+	position: absolute;
+	top: 300px;
+	left: 200px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+        width:900px;
+}
+
+#thankYou {
+	position: absolute;
+	top: 200px;
+	left: 600px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+}
+
+#input_password {
+	position: absolute;
+	top: 200px;
+	left: 380px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+        width: 1000px;
+}
+
+table
+{
+border-collapse:separate;
+border-spacing:10px 10px;
+}
+
+td
+{
+text-align:center;
+}
+
+.positive {
+    background: green;
+}
+
+.negative {
+    background: red;
+}
+
+.neutral {
+    background: white;
+}
+
+#thanks {
+	position: absolute;
+	top: 200px;
+	left: 380px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+}
+
+#turkNum {
+	position: absolute;
+	top: 200px;
+	left: 380px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+}
+
+.padded {
+	position: absolute;
+        margin: 10px;
+	color: black;
+	font-size: 14pt;
+        width:1000px;
+        left:100px;
+}
+
+
+#yesno {
+	position: relative;
+       top: 80px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+}
+
+#turkNum {
+	position: absolute;
+       top: 100px;
+       left:50px;
+	font-weight: bold;
+	color: black;
+	font-size: 14pt;
+}
+
+.left{
+    	position: absolute;
+	top: 50px;
+	left: 50px;
+	color: black;
+	font-size: 14pt;
+        width: 500px;
+}
+
+.rightUp{
+        position: absolute;
+	top: 50px;
+	left: 450px;
+	color: black;
+	font-size: 14pt;
+        width: 800px;
+}
+
+.right{
+        //position: relative;
+        //z-index: 1000;
+	position: absolute;
+        //top: 50px;
+	left: 450px;
+	color: black;
+	font-size: 12pt;
+        width: 400px;
+}
+
+.rightDown{
+        position: absolute;
+	top: 350px;
+	left: 700px;
+	color: black;
+	font-size: 14pt;
+        width: 500px;   
+        border: 2px solid black;
+}
+</style>
+
+<title>UCL LoveLab Decision Making Experiment</title>
+
+<body  style="overflow:scroll; display: none">
+
+            <div id="consent_form" class="padded">
+    	    	<h1>Welcome to our experiment!</h1>
+    	        <p>Please read all the instructions carefully.
+                <span id="consent" onclick="javascript:intro()"> If you are reading the instructions carefully, 
+                    please click somewhere on this sentence, which will allow you to proceed. Otherwise, the proceed
+                button will deny you access to the experiment.</span><br></p>
+                    <p>Please do not do this HIT if you have done another with the same name:</p>
+                    <p><strong>Learning and Decision Making Psychology Study (Developing Countries)</strong></p>
+                <p>You will be paid <b>$ 3</b> for taking part in this study, which should take about 45 minutes.<br>
+                Please try to help us with our psychological research and do not write down anything from the screen.<br>
+                <p>It is <b>VERY</b> important that you do NOT close the full screen window and you do NOT refresh the page.
+                    If you do that, unfortunately we won't be able to pay you.</p>
+                <p>Please accept the conditions before proceeding.</p>
+		<p><input type="checkbox" name="consent2" id="consent2" value=""> I agree to the above conditions.</p>
+                <button type="button" onclick="javascript:questions()">Proceed to experiment</button>
+            </div>
+
+            <div id="noconsent" class="padded">
+                <h1>You haven't read the instructions carefully!</h1>
+                <p>We apologize, but we can't give you compensation for your participation in this experiment.</p>
+                <p>Please do not attempt to do this experiment again. We would very much like to have you as a participant
+                for future studies.</p>
+            </div>
+
+            <div id="noFS" class="padded">
+                <h1>Sorry but you need to do this experiment in fullscreen mode.</h1>
+                <p>We apologize, but we can't give you compensation for your participation in this experiment.</p>
+                <p>Please do not attempt to do this experiment again. We would very much like to have you as a participant
+                for future studies.</p>
+            </div>
+
+            <div id="sorry" class="padded">
+                <h1>Sorry, but your answer was incorrect. </h1>
+                <p>Thank you for your time, but your knowledge is insufficient to take part in this study. </p>
+                <p>Please do not attempt to do this HIT again as we can't use your data or compensate you. </p>
+                <p>Thank you and please consider participating in future studies on other topics.</p>
+            </div>
+    
+                <div id="sorry2" class="padded">
+                <h1>Sorry, but according to our database you have either done this experiment or a similar one before or have refreshed the page
+                    while doing the experiment. </h1>
+                <p>Thank you for your time, but we can't give you compensation for this reason . </p>
+                <p>Please do not attempt to do this HIT again as we can't use your data or compensate you. </p>
+                <p>Thank you and please consider participating in future studies on other topics.</p>
+            </div>
+    
+             <div id="sorry3" class="padded">
+                <h1>Sorry, but you took more than an hour and a half to finish the experiment. </h1>
+                <p>Thank you for your time, but we can't give you compensation for this reason . </p>
+                <p>Please do not attempt to do this HIT again as we can't use your data or compensate you. </p>
+                <p>Thank you and please consider participating in future studies on other topics.</p>
+            </div>
+    
+            <div id="busy" class="padded">
+                <h1>Sorry, but either our servers are too busy to handle your request or we have filled our participant quota for this HIT. </h1>
+                <p>Thank you for your time, but we can't give you compensation for this reason . </p>
+                <p>Please do not attempt to do this HIT again as we can't use your data or compensate you. </p>
+                <p>Thank you and please consider participating in future studies on other topics.</p>
+            </div>
+
+            <div id="underAge" class="padded">
+                <h1>Sorry but you may not do this experiment if you are under 18. </h1>
+                <p>Please do not attempt to do this experiment again. We would very much like to have you as a participant
+                for future studies where people under the age of 18 may take part.</p>
+                <p>We apologize, but we can't give you the full amount of money.</p>
+            </div>
+
+            <div id="practice_instructions" class="padded" style="margin: 20px;">
+                <!-- Maybe display this in centre of screen? -->
+                <h1>Learning and Decision Making Psychology Study (Developing Countries): Part 1 of 3</h1>
+ 
+<p>In this study, you will learn to use a rule that predicts whether a developing country will increase their Gross Domestic Product (GDP)
+    based on statistics of their economy gathered in 2013. 
+    We want you to learn how to use a very specific rule. 
+    The rule does quite well so we are more interested in you learning the rule than actually trying to learn the predictive value of each
+    statistic directly.
+For each statistic, you will be told whether the country did well or poorly on that measure. 
+All information is taken from reliable sources (World Bank, IMF, etc.), though we hide country names so that you can't rely on 
+any other information you might know about a given country in the developing world. 
+
+On each trial, you will be shown a country's stats and asked what the rule would predict. In other words,
+if the rule would predict that the country increased or decreased their GDP in 2014
+given the stats and their values.
+<strong>Your performance on this part of the study will only evaluate how well you use the rule that will be explained
+    on the next screen.</strong></p> 
+
+<p>When a statistic is favorable for a country it will be shown by a <strong>"+"</strong>  in green, 
+whereas statistics that are unfavorable will be shown by a <strong>"-"</strong> in red. If the statistic is neither favorable
+nor unfavorable the statistic will not be assigned a color and just show "0".
+Based on these stats, if you think the rule predicts increase, press <strong>A</strong> for above. 
+Otherwise, press <strong>B</strong> for below.</p> 
+<p>After responding, you will be told whether the rule would make that prediction or not. </p>
+
+<p>
+Try to respond <strong>A</strong> or <strong>B</strong> as quickly as you can without sacrificing accuracy. 
+To increase speed and accuracy, please keep your index fingers resting on the <strong>A</strong> and <strong>B</strong> keys at all times.</p>
+
+<p>The entire experiment should last around 45 minutes.</p>
+
+<p><strong>Once you have understood these directions,<br>
+press enter.<br>
+Thank You.</strong></p>
+
+</div>
+
+<div id="password" class="nonselectable"></div>
+
+<div id="thankYou" class="center">Thank you!</div>
+
+<div id="example" class="top_center"><strong>PRACTICE Trial: Press "N" to run through the explanation.</strong></div>
+
+<div id="example2" class="top_center"><strong>PRACTICE Trial: Answer A or B to test your use of the rule.</strong></div>
+
+<div id="practice1" class="left">Before you start the actual experiment, we want to make sure you understand
+the recommended rule.<br><br>Press enter to continue.</div>
+
+<div id="fullScreen"><span onclick="javascript:makeFS()" style="color:blue; text-decoration: underline"> 
+        <strong><br>Please click HERE to go back to fullscreen, otherwise you risk 
+            losing compensation and stopping this experiment.</strong></span></div>
+
+<div id="wrong_password">Wrong number! We really want you to do well on this task. It is essential that you make an effort
+to recall the exact six characters for each trial. This experiment is looking at how people can make decisions with
+a limited amount of mental resources. In this case we limit mental resources by making you memorize six characters on each trial.
+Please try to get the full six for each trial.</div>
+
+            <div id="test_instructions1" class="padded">
+                <h1>Learning and Decision Making Psychology Study (Developing Countries): Part 2 of 3</h1>
+                <p>The second part of the study is the same as the first part, except that you will no longer be told 
+                    whether you are using the rule well or not. Your performance on this part of the study is critical
+                    to us,
+                    so please do your best. Part 2 is a test of what you learned in Part 1.</p>
+                <p>As before, on each trial you will decide whether, <strong>according to the rule</strong>,
+                    a developing country with certain statistics
+                    will increase their GDP by pressing the <strong>A</strong> or <strong>B</strong> key. 
+                    
+                    Try to respond <strong>A</strong> or <strong>B</strong> as quickly as you can without sacrificing accuracy. 
+                    To increase speed and accuracy, please keep your index fingers resting on the <strong>A</strong> 
+                    and <strong>B</strong> keys.</p>
+
+                <p><strong>Once you have understood these directions, <br>
+                press enter to continue. <br>
+                Thank You.</strong></p>
+            </div>
+
+            <div id="test_instructions2" class="padded">
+                <h1>Learning and Decision Making Psychology Study (Developing Countries): Part 3 of 3</h1>
+                <p>This final part of the study is the same as the previous part, except that 
+                    you will also be shown six characters prior to each trial for a couple of seconds.</p>
+               <p>You will be asked to remember the full six characters while you are responding
+                to each trial. After each judgment you will be asked to type the six characters in an input box
+                on the screen. </p>
+                    <p>Your performance on this part of the study is critical
+                    to us,
+                    so please do your best.</p>
+                    
+                <p>As before, on each trial you will decide whether, <strong>according to the rule</strong>,
+                    a developing country with certain statistics
+                    will increase their GDP by pressing the <strong>A</strong> or <strong>B</strong> key. 
+                    
+                    Try to respond <strong>A</strong> or <strong>B</strong> as quickly as you can without sacrificing accuracy. 
+                    To increase speed and accuracy, please keep your index fingers resting on the <strong>A</strong> 
+                    and <strong>B</strong> keys.</p>
+
+                <p><strong>Once you have understood these directions, <br>
+                press enter to continue. <br>
+                Thank You.</strong></p>
+            </div>
+
+<div id="input_password">
+    
+  Recall Number: <input type="text" id="pwForm"><br>
+  <p>Press enter after typing in the characters you were meant to remember for this trial.</p>
+</div>
+
+<p id="enter" class="left">
+    The first part of the experiment will now start. Try to use the rule as best as you can.<br><br>
+    Get ready and press enter to start the experiment.</p>
+
+<div id="experiment">
+
+<h3 id="headerInstr">Does the rule predict this country will increase or decrease their GDP?</h3>
+
+<h3 id="feedback"></h3>
+
+<div id="container" class="container">
+    
+    <div id="rule" class="right">
+
+    
+        <u>Stats ranking:  </u><br><br>
+        <p id="predRank"></p>
+        </div>
+    
+
+
+<div id="enter_practice" class="right">You will now practice the rule for ten trials.<br><br>
+    Press N to practice the recommended rule.</div>
+    
+    
+<table>
+  <tr>
+    <td><u>Stats</u></td>
+    <td><u>Values</u></td>
+  </tr>
+  
+  <tr id="first_pred">
+    <td id="ShowText1"></td>
+    <td id="ShowSign1"></td>
+  </tr>
+  
+  <tr id="second_pred">
+    <td id="ShowText2"></td>
+    <td id="ShowSign2"></td>
+  </tr>
+
+  <tr id="third_pred">
+    <td id="ShowText3"></td>
+    <td id="ShowSign3"></td>
+  </tr>
+    
+  <tr id="fourth_pred">
+    <td id="ShowText4"></td>
+    <td id="ShowSign4"></td>
+  </tr>
+    
+  <tr id="fifth_pred">
+    <td id="ShowText5"></td>
+    <td id="ShowSign5"></td>
+  </tr>
+  
+  <tr id="sixth_pred">
+    <td id="ShowText6"></td>
+    <td id="ShowSign6"></td>
+  </tr>
+  
+  <tr id="seventh_pred">
+    <td id="ShowText7"></td>
+    <td id="ShowSign7"></td>
+  </tr>  
+  
+</table>  
+    
+
+   
+</div> 
+
+<div id="yesno">
+    Press the 'a' key if you think the rule would predict
+    this country would increase their GDP. Press the 'b' key if not.<br><br>
+    
+</div> 
+
+</div>
+
+<!--<div id="thanks">Thanks! Please submit: 
+<div id="inputs"></div>   
+ REMOVE ME BEFORE PUTTING ON TURK 
+<input type="submit" id="submitButton" name="submitButton" onsubmit="javascript:giveNum()"> 
+<button type="button" onclick="javascript:giveNum()">Submit</button>
+<form id="thanks" action="http://www.mturk.com/mturk/externalSubmit" method="post" class="padded">
+Thanks! Please submit ONLY after copying the code above:
+<input type="submit" id="submitButton" name="submitButton">
+</div>-->
+
+<form id="thanks" class="padded">
+
+<div id="inputs"></div>   
+    
+</form>
+<span id="turkNum"></span>
+
+
+<form id="questions" class="padded">
+
+ Please input your gender and age.
+<br><br>
+
+<input type="radio" name="sex" value="male">Male<br>
+<input type="radio" name="sex" value="female">Female<br><br>
+
+ Age: <input type="text" id="age" class="noEnterSubmit"><br><br>
+ 
+ 
+<button type="button" onclick="javascript:chk_questions()">Submit Answer</button>
+
+<br><br>
+</form>
+
+<div id="predictor_explanation1" class="left">
+    
+    <h3>Developing Country Stats</h3>
+    
+    Please read through the whole list of the seven stats. <br>
+
+    During the experiment, when a developing country has the good version of the stat, we will show it in green. <br>
+    On the other hand, when the country has the bad version of the stat, it will be in red. <br>
+    Otherwise, the statistic will be neutral and will not be assigned a color.
+    
+    The purpose of the experiment is that you learn to recognize the important stats.<br>
+    You can see the ranking of the stats from most to least important on the right.<br>
+    To do this you should use the following rule in your judgments:<br><br>
+    
+    <u>Rule:</u><br><br>
+    <strong>
+    If the best statistic has a value (red or green) then answer in the direction of that statistic.<br><br>
+    
+    Otherwise, if the best statistic is neutral then look at the next best statistic on the list and answer in its direction and so on.<br><br>
+    
+    In other words, go through the list of ranked stats one by one until you find one that is not neutral and answer accordingly.</strong><br><br>
+
+    
+  <table class="rightUp">
+      
+      
+  <tr>
+    <th>Stats</th>
+
+  </tr>
+  
+  <tr>
+    <td id="X7"></td>
+
+  </tr>
+ 
+    <tr>
+    <td id="X6"></td>
+
+  </tr>
+  
+    <tr>
+    <td id="X5"></td>
+
+  </tr>
+  
+  <tr>
+    <td id="X4"></td>
+
+  </tr>
+  
+  <tr>
+    <td id="X3"></td>
+  
+  </tr>
+  
+    <tr>
+    <td id="X2"></td>
+  
+  </tr>
+  
+    <tr>
+    <td id="X1"></td>
+  
+  </tr>
+  
+  </table>
+    
+    <div id='emphasize' class="rightDown">
+    
+    You will be able to see the written rule during this first part of the experiment.<br><br>
+    
+    Please do not write down the list of ranked stats, otherwise your data will not be of use to our research.<br><br>
+    
+    Once you have gone through the list and have a general understanding of the stats <strong>(and the rule!)</strong>,
+    press <strong>enter</strong>
+    to continue.<br><br>
+    </div>
+    
+</div>
+
+<center id='Rule101'>
+    <br><br>
+<img src="Rule101.png" alt="Rule101" style="width:600px;height:438px">
+</center>
+
+<center id='Rule102'>
+    <br><br>
+<img src="Rule102.png" alt="Rule102" style="width:600px;height:438px">
+</center>
+
+<center id='Rule103'>
+    <br><br>
+<img src="Rule103.png" alt="Rule103" style="width:600px;height:438px">
+</center>
+
+<center id='Rule104'>
+    <br><br>
+<img src="Rule104.png" alt="Rule104" style="width:600px;height:438px">
+</center>
+
+<center id='Rule105'>
+    <br><br>
+<img src="Rule105.png" alt="Rule105" style="width:600px;height:438px">
+</center>
+
+<center id='Rule106'>
+    <br><br>
+<img src="Rule106.png" alt="Rule106" style="width:600px;height:438px">
+</center>
+
+<center id='Rule107'>
+    <br><br>
+<img src="Rule107.png" alt="Rule107" style="width:600px;height:438px">
+</center>
+
+<center id='Rule108'>
+    <br><br>
+<img src="Rule108.png" alt="Rule108" style="width:600px;height:438px">
+</center>
+
+<center id='Rule109'>
+    <br><br>
+<img src="Rule109.png" alt="Rule109" style="width:600px;height:438px">
+</center>
+
+<center id='Rule110'>
+    <br><br>
+<img src="Rule110.png" alt="Rule110" style="width:600px;height:438px">
+</center>
+
+<button type="button" id="continue" onclick="javascript:advisor()">Continue</button>
+
+</body>
